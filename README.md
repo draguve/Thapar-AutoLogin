@@ -2,6 +2,7 @@
 Python Script To Keep Yourself Connected to the Internet At Thapar
 
 ##Dependencies
+
 - [Docopt][190d4da5]
 
   [190d4da5]: http://docopt.org "docopt"
@@ -10,14 +11,18 @@ Python Script To Keep Yourself Connected to the Internet At Thapar
 
   [adb5980f]: http://www.seleniumhq.org/ "selenium"
 
- - [PhantomJS][6f9ffd6b]
+- [PhantomJS][6f9ffd6b]
 
   [6f9ffd6b]: http://phantomjs.org/ "phantomjs"
 
+
+###Installing Dependencies
+~~~~
     Windows:
         pip install selenium docopt
     Linux :
         sudo pip install selenium docopt
+~~~~
 
 ## Setup
 Use This to command to download PhantomJS binaries for your system
