@@ -29,6 +29,23 @@ def login_user(user,password):
     )
     return response.text
 
+def logout_user(user):
+    time_in_ms = time.time()*1000
+    data = {"mode" : 193,"username":user,"a":str(int(time_in_ms)),"producttype":0}
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+       'Content-Type': 'application/x-www-form-urlencoded;',
+        'X-Requested-With': 'XMLHttpRequest'
+    }
+    s = requests.Session()
+    response = s.post(
+        url='https://172.31.1.6:8090/login.xml',
+        data=data,
+        headers=headers,
+        verify=False
+    )
+
 #verifies the xml returned is logged in
 def verify_login(xml_data):
         root = xml.fromstring(xml_data)
@@ -44,7 +61,7 @@ def verify_login(xml_data):
 
 #sends a single is live request 
 def send_heartbead(username):
-    url = "https://172.31.1.6:8090/live?mode=192&username=" + username + "&a=" + str(int(time.time()*1000)) + "0"
+    url = "https://172.31.1.6:8090/live?mode=192&username=" + username + "&a=" + str(int(time.time()*1000)) + "&producttype=0"
     check =  urllib.request.urlopen(url,context=ssl._create_unverified_context()).read()
     if check!=None:
         return True
