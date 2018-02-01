@@ -4,6 +4,7 @@ import ssl
 import xml.etree.ElementTree as xml
 import pickle 
 import socket
+import os.path as path 
 
 requests.packages.urllib3.disable_warnings() 
 
@@ -12,22 +13,26 @@ REMOTE_SERVER = "https://github.com/"
 
 #sends login ajax request 
 def login_user(user,password):
-    time_in_ms = time.time()*1000
-    data = {"mode" : 191,"username":user,"password":password,"a":str(int(time_in_ms)),"producttype":0}
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
-        'Accept': 'application/json, text/javascript, */*; q=0.01',
-       'Content-Type': 'application/x-www-form-urlencoded;',
-        'X-Requested-With': 'XMLHttpRequest'
-    }
-    s = requests.Session()
-    response = s.post(
-        url='https://172.31.1.6:8090/login.xml',
-        data=data,
-        headers=headers,
-        verify=False
-    )
-    return response.text
+    try:
+        time_in_ms = time.time()*1000
+        data = {"mode" : 191,"username":user,"password":password,"a":str(int(time_in_ms)),"producttype":0}
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'Content-Type': 'application/x-www-form-urlencoded;',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+        s = requests.Session()
+        response = s.post(
+            url='https://172.31.1.6:8090/login.xml',
+            data=data,
+            headers=headers,
+            verify=False
+        )
+        return response.text
+    except requests.exceptions.ConnectionError:
+        print("Could not connect to server")
+
 
 def logout_user(user):
     time_in_ms = time.time()*1000
@@ -48,6 +53,8 @@ def logout_user(user):
 
 #verifies the xml returned is logged in
 def verify_login(xml_data):
+        if(xml_data == None):
+            return False
         root = xml.fromstring(xml_data)
         retdata = root[1].text
         if(retdata=='You have successfully logged in'):
@@ -67,14 +74,11 @@ def send_heartbead(username):
         return True
     return False
 
-#regularly send a request to the server to tell it to keep the connection open 
-# def send_regular(user,time_in_ms):
-#     while(True):
-#         send_live_request(user)
-#         time.sleep(time_in_ms)
-
 #load a dict from a file 
 def load_pwds(filename):
+    if(not(path.isfile(filename))):
+        save_pwds(filename,{})
+        return {}
     with open(filename,'rb') as f:
         __passwords__ = pickle.load(f)
     return __passwords__
@@ -83,6 +87,12 @@ def load_pwds(filename):
 def save_pwds(filename,pwds):
     with open(filename,'wb') as f:
         pickle.dump(pwds,f)
+
+#adds user to filename
+def add_user(username,password,filename):
+    passes = load_pwds(filename)
+    passes[username]=password
+    save_pwds(filename,passes)  
 
 #checks if the device is connected to the internet
 def is_connected():
@@ -128,7 +138,9 @@ def login(username,password,time_between_heartbeats):
     if(try_login(username,password)):
         print("Logged into user " + username)
         while(True):
-            time.sleep(time_between_heartbeats)
+            #sleeps cut into 1 seconds to handle sigint
+            for i in range(time_between_heartbeats):
+                time.sleep(1)
             if(not(heartbeat_checked(username))):
                 break
             else:
@@ -141,9 +153,3 @@ def login_from_file(filename,time_between_heartbeats):
     passes = load_pwds(filename)
     for username,password in passes.items():
         login(username,password,time_between_heartbeats)
-
-#adds user to filename
-def add_user(username,password,filename):
-    passes = load_pwds(filename)
-    passes[username]=password
-    save_pwds(filename,passes)
