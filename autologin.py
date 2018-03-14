@@ -26,8 +26,8 @@ def login_all():
     global currentuser
     for username,password in passwords.items():
         currentuser = username
+        requestmanager.logout_user(currentuser)
         requestmanager.login(username,password,time_between_heartbeats)
-        print("could not reconnect,switching user")
     print("no more passwords entered or available")
 
 def file_exists():

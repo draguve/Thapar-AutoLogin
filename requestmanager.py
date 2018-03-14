@@ -63,7 +63,7 @@ def verify_login(xml_data):
             print("Wrong password or username")
             return False
         else:
-            print("Could not log you on")
+            #print("Could not log you on")
             return False
 
 #sends a single is live request 
@@ -113,15 +113,7 @@ def checked_login(username,password):
 
 #logs in the website and checks if connected to the internet
 def try_login(username,password):
-    tries = 3
-    connected = False
-    while(tries>0):
-        if(checked_login(username,password)):
-            connected = True
-            break
-        else:
-            tries=tries-1
-    if(connected):
+    if(checked_login(username,password)):
         if(is_connected()):
             return True
         else:
@@ -146,7 +138,7 @@ def login(username,password,time_between_heartbeats):
             else:
                 print("*")
     else:
-        print("Could not login after 3 tries")
+        print("Could not login " + username)
 
 #logs in all user one by one,pwds stored in filename
 def login_from_file(filename,time_between_heartbeats):
